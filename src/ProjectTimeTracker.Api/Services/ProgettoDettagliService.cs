@@ -6,15 +6,26 @@ using ProjectTimeTracker.Api.Models;
 
 namespace ProjectTimeTracker.Api.Services;
 
+/// <summary>
+/// Implementa la logica applicativa per la gestione dei dettagli progetto.
+/// </summary>
 public class ProgettoDettagliService : IProgettoDettagliService
 {
-    private readonly AppDbContext _db;
+    private readonly IAppDbContext _db;
 
-    public ProgettoDettagliService(AppDbContext db)
+    /// <summary>
+    /// Inizializza una nuova istanza del service.
+    /// </summary>
+    /// <param name="db">Contesto applicativo astratto.</param>
+    public ProgettoDettagliService(IAppDbContext db)
     {
         _db = db;
     }
 
+    /// <summary>
+    /// Restituisce i dettagli di un progetto.
+    /// </summary>
+    /// <param name="progettoId">Identificativo del progetto.</param>
     public async Task<List<ProgettoDettaglioDto>> GetByProgettoIdAsync(int progettoId)
     {
         if (!await _db.Progetti.AnyAsync(x => x.Id == progettoId))
@@ -33,11 +44,15 @@ public class ProgettoDettagliService : IProgettoDettagliService
                 Dettaglio = x.Dettaglio,
                 Data = x.Data,
                 UtenteId = x.UtenteId,
-                Utente = x.Utente != null ? x.Utente.Cognome + " " + x.Utente.Nome : string.Empty
+                Utente = x.Utente != null ? $"{x.Utente.Cognome} {x.Utente.Nome}" : string.Empty
             })
             .ToListAsync();
     }
 
+    /// <summary>
+    /// Crea un nuovo dettaglio progetto.
+    /// </summary>
+    /// <param name="dto">Dati del dettaglio da creare.</param>
     public async Task<ProgettoDettaglioDto> CreateAsync(ProgettoDettaglioCreateDto dto)
     {
         if (!await _db.Progetti.AnyAsync(x => x.Id == dto.ProgettoId))
@@ -71,7 +86,7 @@ public class ProgettoDettagliService : IProgettoDettagliService
                 Dettaglio = x.Dettaglio,
                 Data = x.Data,
                 UtenteId = x.UtenteId,
-                Utente = x.Utente != null ? x.Utente.Cognome + " " + x.Utente.Nome : string.Empty
+                Utente = x.Utente != null ? $"{x.Utente.Cognome} {x.Utente.Nome}" : string.Empty
             })
             .FirstAsync();
     }

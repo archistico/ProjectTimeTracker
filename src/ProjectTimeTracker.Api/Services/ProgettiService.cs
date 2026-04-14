@@ -6,15 +6,25 @@ using ProjectTimeTracker.Api.Models;
 
 namespace ProjectTimeTracker.Api.Services;
 
+/// <summary>
+/// Implementa la logica applicativa per la gestione dei progetti.
+/// </summary>
 public class ProgettiService : IProgettiService
 {
-    private readonly AppDbContext _db;
+    private readonly IAppDbContext _db;
 
-    public ProgettiService(AppDbContext db)
+    /// <summary>
+    /// Inizializza una nuova istanza del service.
+    /// </summary>
+    /// <param name="db">Contesto applicativo astratto.</param>
+    public ProgettiService(IAppDbContext db)
     {
         _db = db;
     }
 
+    /// <summary>
+    /// Restituisce tutti i progetti con i relativi dati descrittivi e il totale minuti lavorati.
+    /// </summary>
     public async Task<List<ProgettoDto>> GetAllAsync()
     {
         return await _db.Progetti
@@ -42,6 +52,10 @@ public class ProgettiService : IProgettiService
             .ToListAsync();
     }
 
+    /// <summary>
+    /// Restituisce un progetto per identificativo.
+    /// </summary>
+    /// <param name="id">Identificativo del progetto.</param>
     public async Task<ProgettoDto?> GetByIdAsync(int id)
     {
         return await _db.Progetti
@@ -69,6 +83,10 @@ public class ProgettiService : IProgettiService
             .FirstOrDefaultAsync();
     }
 
+    /// <summary>
+    /// Crea un nuovo progetto dopo aver validato i riferimenti collegati.
+    /// </summary>
+    /// <param name="dto">Dati del progetto da creare.</param>
     public async Task<ProgettoDto> CreateAsync(ProgettoCreateDto dto)
     {
         await VerificaRiferimentiAsync(dto.AreaId, dto.StatoId, dto.UrgenzaId);
@@ -88,9 +106,14 @@ public class ProgettiService : IProgettiService
         await _db.SaveChangesAsync();
 
         return await GetByIdAsync(entity.Id)
-            ?? throw new InvalidOperationException("Progetto non trovato dopo il salvataggio.");
+               ?? throw new InvalidOperationException("Progetto non trovato dopo il salvataggio.");
     }
 
+    /// <summary>
+    /// Aggiorna un progetto esistente.
+    /// </summary>
+    /// <param name="id">Identificativo del progetto.</param>
+    /// <param name="dto">Nuovi dati del progetto.</param>
     public async Task<bool> UpdateAsync(int id, ProgettoUpdateDto dto)
     {
         await VerificaRiferimentiAsync(dto.AreaId, dto.StatoId, dto.UrgenzaId);
@@ -114,6 +137,10 @@ public class ProgettiService : IProgettiService
         return true;
     }
 
+    /// <summary>
+    /// Elimina un progetto esistente.
+    /// </summary>
+    /// <param name="id">Identificativo del progetto.</param>
     public async Task<bool> DeleteAsync(int id)
     {
         var entity = await _db.Progetti.FirstOrDefaultAsync(x => x.Id == id);
@@ -127,6 +154,9 @@ public class ProgettiService : IProgettiService
         return true;
     }
 
+    /// <summary>
+    /// Verifica l'esistenza delle entità referenziate dal progetto.
+    /// </summary>
     private async Task VerificaRiferimentiAsync(int areaId, int statoId, int urgenzaId)
     {
         if (!await _db.Aree.AnyAsync(x => x.Id == areaId))

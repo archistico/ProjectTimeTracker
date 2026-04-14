@@ -4,62 +4,45 @@ using ProjectTimeTracker.Api.Dtos;
 
 namespace ProjectTimeTracker.Api.Services;
 
+/// <summary>
+/// Implementa la logica applicativa per il cruscotto riepilogativo.
+/// </summary>
 public class DashboardService : IDashboardService
 {
-    private readonly AppDbContext _db;
+    private const string StatoCompletato = "Completato";
+    private const string StatoAnnullato = "Annullato";
+    private const string UrgenzaUrgente = "Urgente";
 
-    public DashboardService(AppDbContext db)
+    private readonly IAppDbContext _db;
+
+    /// <summary>
+    /// Inizializza una nuova istanza del service.
+    /// </summary>
+    /// <param name="db">Contesto applicativo astratto.</param>
+    public DashboardService(IAppDbContext db)
     {
         _db = db;
     }
 
+    /// <summary>
+    /// Costruisce i dati aggregati della dashboard.
+    /// </summary>
     public async Task<DashboardDto> GetDashboardAsync()
     {
         var oggi = DateTime.Today;
         var setteGiorniFa = oggi.AddDays(-6);
 
-        var progettoCompletato = await _db.Stati
-            .Where(x => x.Descrizione == "Completato")
-            .Select(x => (int?)x.Id)
-            .FirstOrDefaultAsync();
+        var progettiAttiviQuery = GetProgettiAttiviQuery();
 
-        var progettiApertiQuery = _db.Progetti.AsQueryable();
+        var progettiAperti = await progettiAttiviQuery.CountAsync();
 
-        if (progettoCompletato.HasValue)
-        {
-            progettiApertiQuery = progettiApertiQuery.Where(x => x.StatoId != progettoCompletato.Value);
-        }
+        var progettiUrgenti = await progettiAttiviQuery
+            .Where(x => x.Urgenza != null && x.Urgenza.Descrizione == UrgenzaUrgente)
+            .CountAsync();
 
-        var progettiAperti = await progettiApertiQuery.CountAsync();
-
-        var urgenzaUrgenteId = await _db.Urgenze
-            .Where(x => x.Descrizione == "Urgente")
-            .Select(x => (int?)x.Id)
-            .FirstOrDefaultAsync();
-
-        var progettiUrgentiQuery = _db.Progetti.AsQueryable();
-        if (urgenzaUrgenteId.HasValue)
-        {
-            progettiUrgentiQuery = progettiUrgentiQuery.Where(x => x.UrgenzaId == urgenzaUrgenteId.Value);
-        }
-
-        if (progettoCompletato.HasValue)
-        {
-            progettiUrgentiQuery = progettiUrgentiQuery.Where(x => x.StatoId != progettoCompletato.Value);
-        }
-
-        var progettiUrgenti = await progettiUrgentiQuery.CountAsync();
-
-        var progettiInRitardoQuery = _db.Progetti
-            .Where(x => x.DataFineRichiesta.HasValue &&
-                        x.DataFineRichiesta.Value.Date < oggi);
-
-        if (progettoCompletato.HasValue)
-        {
-            progettiInRitardoQuery = progettiInRitardoQuery.Where(x => x.StatoId != progettoCompletato.Value);
-        }
-
-        var progettiInRitardo = await progettiInRitardoQuery.CountAsync();
+        var progettiInRitardo = await progettiAttiviQuery
+            .Where(x => x.DataFineRichiesta.HasValue && x.DataFineRichiesta.Value.Date < oggi)
+            .CountAsync();
 
         var minutiLavoratiOggi = await _db.TempiLavorati
             .Where(x => x.Data.Date == oggi)
@@ -94,5 +77,18 @@ public class DashboardService : IDashboardService
             MinutiLavoratiUltimi7Giorni = minutiLavoratiUltimi7Giorni,
             UltimiAggiornamenti = ultimiAggiornamenti
         };
+    }
+
+    /// <summary>
+    /// Costruisce la query base dei progetti considerati attivi.
+    /// Un progetto è considerato attivo se non ha una data di fine effettiva
+    /// e non è in uno stato finale noto.
+    /// </summary>
+    private IQueryable<ProjectTimeTracker.Api.Models.Progetto> GetProgettiAttiviQuery()
+    {
+        return _db.Progetti.Where(x =>
+            !x.DataFineEffettiva.HasValue &&
+            (x.Stato == null ||
+             (x.Stato.Descrizione != StatoCompletato && x.Stato.Descrizione != StatoAnnullato)));
     }
 }

@@ -5,8 +5,15 @@ using ProjectTimeTracker.Api.Services;
 
 namespace ProjectTimeTracker.Api;
 
+/// <summary>
+/// Punto di ingresso dell'applicazione API.
+/// </summary>
 public class Program
 {
+    /// <summary>
+    /// Avvia l'applicazione ASP.NET Core.
+    /// </summary>
+    /// <param name="args">Argomenti da linea di comando.</param>
     public static void Main(string[] args)
     {
         var builder = WebApplication.CreateBuilder(args);
@@ -18,10 +25,12 @@ public class Program
         builder.Services.AddDbContext<AppDbContext>(options =>
             options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-        builder.Services.AddScoped<IUtentiService, UtentiService>();
+        builder.Services.AddScoped<IAppDbContext>(sp => sp.GetRequiredService<AppDbContext>());
+
         builder.Services.AddScoped<IAreeService, AreeService>();
         builder.Services.AddScoped<IStatiService, StatiService>();
         builder.Services.AddScoped<IUrgenzeService, UrgenzeService>();
+        builder.Services.AddScoped<IUtentiService, UtentiService>();
         builder.Services.AddScoped<IProgettiService, ProgettiService>();
         builder.Services.AddScoped<IProgettoDettagliService, ProgettoDettagliService>();
         builder.Services.AddScoped<ICronologiaService, CronologiaService>();
@@ -55,11 +64,11 @@ public class Program
         }
 
         app.UseMiddleware<ExceptionHandlingMiddleware>();
-
         app.UseCors("WebClient");
         app.UseHttpsRedirection();
         app.UseAuthorization();
         app.MapControllers();
+
         app.Run();
     }
 }

@@ -6,15 +6,41 @@ using ProjectTimeTracker.Api.Models;
 
 namespace ProjectTimeTracker.Api.Services;
 
+/// <summary>
+/// Implementa la logica applicativa per la gestione della cronologia.
+/// </summary>
 public class CronologiaService : ICronologiaService
 {
-    private readonly AppDbContext _db;
+    private readonly IAppDbContext _db;
 
-    public CronologiaService(AppDbContext db)
+    /// <summary>
+    /// Inizializza una nuova istanza del service.
+    /// </summary>
+    /// <param name="db">Contesto applicativo astratto.</param>
+    public CronologiaService(IAppDbContext db)
     {
         _db = db;
     }
 
+    /// <inheritdoc />
+    public async Task<CronologiaDto?> GetByIdAsync(int id)
+    {
+        return await _db.Cronologie
+            .Include(x => x.Utente)
+            .Where(x => x.Id == id)
+            .Select(x => new CronologiaDto
+            {
+                Id = x.Id,
+                ProgettoId = x.ProgettoId,
+                UtenteId = x.UtenteId,
+                Utente = x.Utente != null ? $"{x.Utente.Cognome} {x.Utente.Nome}" : string.Empty,
+                Azione = x.Azione,
+                Data = x.Data
+            })
+            .FirstOrDefaultAsync();
+    }
+
+    /// <inheritdoc />
     public async Task<List<CronologiaDto>> GetByProgettoIdAsync(int progettoId)
     {
         if (!await _db.Progetti.AnyAsync(x => x.Id == progettoId))
@@ -31,13 +57,14 @@ public class CronologiaService : ICronologiaService
                 Id = x.Id,
                 ProgettoId = x.ProgettoId,
                 UtenteId = x.UtenteId,
-                Utente = x.Utente != null ? x.Utente.Cognome + " " + x.Utente.Nome : string.Empty,
+                Utente = x.Utente != null ? $"{x.Utente.Cognome} {x.Utente.Nome}" : string.Empty,
                 Azione = x.Azione,
                 Data = x.Data
             })
             .ToListAsync();
     }
 
+    /// <inheritdoc />
     public async Task<CronologiaDto> CreateAsync(CronologiaCreateDto dto)
     {
         if (!await _db.Progetti.AnyAsync(x => x.Id == dto.ProgettoId))
@@ -61,18 +88,7 @@ public class CronologiaService : ICronologiaService
         _db.Cronologie.Add(entity);
         await _db.SaveChangesAsync();
 
-        return await _db.Cronologie
-            .Include(x => x.Utente)
-            .Where(x => x.Id == entity.Id)
-            .Select(x => new CronologiaDto
-            {
-                Id = x.Id,
-                ProgettoId = x.ProgettoId,
-                UtenteId = x.UtenteId,
-                Utente = x.Utente != null ? x.Utente.Cognome + " " + x.Utente.Nome : string.Empty,
-                Azione = x.Azione,
-                Data = x.Data
-            })
-            .FirstAsync();
+        return await GetByIdAsync(entity.Id)
+               ?? throw new InvalidOperationException("Voce di cronologia non trovata dopo il salvataggio.");
     }
 }

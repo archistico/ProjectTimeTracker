@@ -5,15 +5,25 @@ using ProjectTimeTracker.Api.Models;
 
 namespace ProjectTimeTracker.Api.Services;
 
+/// <summary>
+/// Implementa la logica applicativa per la gestione degli utenti.
+/// </summary>
 public class UtentiService : IUtentiService
 {
-    private readonly AppDbContext _db;
+    private readonly IAppDbContext _db;
 
-    public UtentiService(AppDbContext db)
+    /// <summary>
+    /// Inizializza una nuova istanza del service.
+    /// </summary>
+    /// <param name="db">Contesto applicativo astratto.</param>
+    public UtentiService(IAppDbContext db)
     {
         _db = db;
     }
 
+    /// <summary>
+    /// Restituisce tutti gli utenti ordinati per cognome e nome.
+    /// </summary>
     public async Task<List<UtenteDto>> GetAllAsync()
     {
         return await _db.Utenti
@@ -29,6 +39,10 @@ public class UtentiService : IUtentiService
             .ToListAsync();
     }
 
+    /// <summary>
+    /// Restituisce un utente per identificativo.
+    /// </summary>
+    /// <param name="id">Identificativo dell'utente.</param>
     public async Task<UtenteDto?> GetByIdAsync(int id)
     {
         return await _db.Utenti
@@ -43,18 +57,23 @@ public class UtentiService : IUtentiService
             .FirstOrDefaultAsync();
     }
 
+    /// <summary>
+    /// Crea un nuovo utente.
+    /// </summary>
+    /// <param name="dto">Dati dell'utente da creare.</param>
     public async Task<UtenteDto> CreateAsync(UtenteCreateDto dto)
     {
         var entity = new Utente
         {
-            Username = dto.Username,
-            Cognome = dto.Cognome,
-            Nome = dto.Nome
+            Username = dto.Username.Trim(),
+            Cognome = dto.Cognome.Trim(),
+            Nome = dto.Nome.Trim()
         };
 
         _db.Utenti.Add(entity);
         await _db.SaveChangesAsync();
 
-        return await GetByIdAsync(entity.Id) ?? throw new InvalidOperationException("Utente non trovato dopo il salvataggio.");
+        return await GetByIdAsync(entity.Id)
+               ?? throw new InvalidOperationException("Utente non trovato dopo il salvataggio.");
     }
 }

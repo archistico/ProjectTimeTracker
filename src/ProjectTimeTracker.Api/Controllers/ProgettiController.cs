@@ -4,6 +4,9 @@ using ProjectTimeTracker.Api.Services;
 
 namespace ProjectTimeTracker.Api.Controllers;
 
+/// <summary>
+/// Espone gli endpoint REST per la gestione dei progetti e delle relative informazioni collegate.
+/// </summary>
 [ApiController]
 [Route("api/[controller]")]
 public class ProgettiController : ControllerBase
@@ -13,6 +16,9 @@ public class ProgettiController : ControllerBase
     private readonly ICronologiaService _cronologiaService;
     private readonly ITempoLavoratoService _tempoService;
 
+    /// <summary>
+    /// Inizializza una nuova istanza del controller.
+    /// </summary>
     public ProgettiController(
         IProgettiService service,
         IProgettoDettagliService dettagliService,
@@ -25,12 +31,19 @@ public class ProgettiController : ControllerBase
         _tempoService = tempoService;
     }
 
+    /// <summary>
+    /// Restituisce tutti i progetti.
+    /// </summary>
     [HttpGet]
     public async Task<ActionResult<List<ProgettoDto>>> GetAll()
     {
         return Ok(await _service.GetAllAsync());
     }
 
+    /// <summary>
+    /// Restituisce un progetto per identificativo.
+    /// </summary>
+    /// <param name="id">Identificativo del progetto.</param>
     [HttpGet("{id:int}")]
     public async Task<ActionResult<ProgettoDto>> GetById(int id)
     {
@@ -38,6 +51,10 @@ public class ProgettiController : ControllerBase
         return result == null ? NotFound() : Ok(result);
     }
 
+    /// <summary>
+    /// Crea un nuovo progetto.
+    /// </summary>
+    /// <param name="dto">Dati del progetto da creare.</param>
     [HttpPost]
     public async Task<ActionResult<ProgettoDto>> Create([FromBody] ProgettoCreateDto dto)
     {
@@ -45,6 +62,11 @@ public class ProgettiController : ControllerBase
         return CreatedAtAction(nameof(GetById), new { id = result.Id }, result);
     }
 
+    /// <summary>
+    /// Aggiorna un progetto esistente.
+    /// </summary>
+    /// <param name="id">Identificativo del progetto.</param>
+    /// <param name="dto">Nuovi dati del progetto.</param>
     [HttpPut("{id:int}")]
     public async Task<IActionResult> Update(int id, [FromBody] ProgettoUpdateDto dto)
     {
@@ -52,6 +74,10 @@ public class ProgettiController : ControllerBase
         return updated ? NoContent() : NotFound();
     }
 
+    /// <summary>
+    /// Elimina un progetto esistente.
+    /// </summary>
+    /// <param name="id">Identificativo del progetto.</param>
     [HttpDelete("{id:int}")]
     public async Task<IActionResult> Delete(int id)
     {
@@ -59,51 +85,47 @@ public class ProgettiController : ControllerBase
         return deleted ? NoContent() : NotFound();
     }
 
+    /// <summary>
+    /// Restituisce i dettagli di un progetto.
+    /// La verifica di esistenza del progetto è demandata al service.
+    /// </summary>
+    /// <param name="id">Identificativo del progetto.</param>
     [HttpGet("{id:int}/dettagli")]
     public async Task<ActionResult<List<ProgettoDettaglioDto>>> GetDettagli(int id)
     {
-        var progetto = await _service.GetByIdAsync(id);
-        if (progetto == null)
-        {
-            return NotFound();
-        }
-
         return Ok(await _dettagliService.GetByProgettoIdAsync(id));
     }
 
+    /// <summary>
+    /// Restituisce la cronologia di un progetto.
+    /// La verifica di esistenza del progetto è demandata al service.
+    /// </summary>
+    /// <param name="id">Identificativo del progetto.</param>
     [HttpGet("{id:int}/cronologia")]
     public async Task<ActionResult<List<CronologiaDto>>> GetCronologia(int id)
     {
-        var progetto = await _service.GetByIdAsync(id);
-        if (progetto == null)
-        {
-            return NotFound();
-        }
-
         return Ok(await _cronologiaService.GetByProgettoIdAsync(id));
     }
 
+    /// <summary>
+    /// Restituisce i tempi lavorati di un progetto.
+    /// La verifica di esistenza del progetto è demandata al service.
+    /// </summary>
+    /// <param name="id">Identificativo del progetto.</param>
     [HttpGet("{id:int}/tempo")]
     public async Task<ActionResult<List<TempoLavoratoDto>>> GetTempo(int id)
     {
-        var progetto = await _service.GetByIdAsync(id);
-        if (progetto == null)
-        {
-            return NotFound();
-        }
-
         return Ok(await _tempoService.GetByProgettoIdAsync(id));
     }
 
+    /// <summary>
+    /// Restituisce il totale dei minuti lavorati per un progetto.
+    /// La verifica di esistenza del progetto è demandata al service.
+    /// </summary>
+    /// <param name="id">Identificativo del progetto.</param>
     [HttpGet("{id:int}/tempo/totale-minuti")]
     public async Task<ActionResult<int>> GetTotaleMinuti(int id)
     {
-        var progetto = await _service.GetByIdAsync(id);
-        if (progetto == null)
-        {
-            return NotFound();
-        }
-
         return Ok(await _tempoService.GetTotaleMinutiByProgettoIdAsync(id));
     }
 }
