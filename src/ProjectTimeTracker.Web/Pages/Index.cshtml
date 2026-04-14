@@ -4,6 +4,28 @@
     ViewData["Title"] = "Dashboard";
 }
 
+@if (Model.CurrentUser != null)
+{
+    <div class="alert alert-secondary mb-4">
+        Utente corrente: <strong>@Model.CurrentUser.Cognome @Model.CurrentUser.Nome</strong> (@Model.CurrentUser.Username)
+    </div>
+}
+
+@if (Model.Dashboard.Message?.HasValue == true)
+{
+    <div class="alert @Model.Dashboard.Message.CssClass mb-4">
+        @if (!string.IsNullOrWhiteSpace(Model.Dashboard.Message.Title))
+        {
+            <div class="fw-bold mb-1">@Model.Dashboard.Message.Title</div>
+        }
+
+        @if (!string.IsNullOrWhiteSpace(Model.Dashboard.Message.Text))
+        {
+            <div>@Model.Dashboard.Message.Text</div>
+        }
+    </div>
+}
+
 <div class="row g-3 mb-4">
     <div class="col-md-6 col-xl-3">
         <div class="card-stat">
@@ -68,19 +90,19 @@
                             </tr>
                         </thead>
                         <tbody>
-                        @foreach (var item in Model.Dashboard.UltimiAggiornamenti)
-                        {
-                            <tr>
-                                <td>@item.Data.ToString("dd/MM/yyyy HH:mm")</td>
-                                <td>@item.Azione</td>
-                                <td>@item.Utente</td>
-                                <td>
-                                    <a asp-page="/Progetti/Details" asp-route-id="@item.ProgettoId" class="btn btn-sm btn-outline-light">
-                                        Apri progetto
-                                    </a>
-                                </td>
-                            </tr>
-                        }
+                            @foreach (var item in Model.Dashboard.UltimiAggiornamenti)
+                            {
+                                <tr>
+                                    <td>@item.Data.ToString("dd/MM/yyyy HH:mm")</td>
+                                    <td>@item.Azione</td>
+                                    <td>@item.Utente</td>
+                                    <td>
+                                        <a asp-page="/Progetti/Details" asp-route-id="@item.ProgettoId" class="btn btn-sm btn-outline-light">
+                                            Apri progetto
+                                        </a>
+                                    </td>
+                                </tr>
+                            }
                         </tbody>
                     </table>
                 </div>

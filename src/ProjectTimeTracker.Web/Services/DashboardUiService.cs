@@ -34,52 +34,59 @@ public class DashboardUiService : IDashboardUiService
 
     public async Task<DashboardViewModel> GetDashboardAsync(CancellationToken cancellationToken = default)
     {
-        var response = await _apiClient.GetAsync<DashboardApiResponse>(ApiEndpoints.Dashboard, cancellationToken)
-                     ?? new DashboardApiResponse();
-
-        return new DashboardViewModel
+        try
         {
-            ProgettiAperti = new DashboardStatCardViewModel
+            var response = await _apiClient.GetAsync<DashboardApiResponse>(ApiEndpoints.Dashboard, cancellationToken)
+                         ?? new DashboardApiResponse();
+
+            return new DashboardViewModel
             {
-                Titolo = "Progetti aperti",
-                Valore = response.ProgettiAperti.ToString(),
-                Sottotitolo = "Attualmente non completati"
-            },
-            ProgettiUrgenti = new DashboardStatCardViewModel
-            {
-                Titolo = "Progetti urgenti",
-                Valore = response.ProgettiUrgenti.ToString(),
-                Sottotitolo = "Da tenere sotto controllo"
-            },
-            ProgettiInRitardo = new DashboardStatCardViewModel
-            {
-                Titolo = "Progetti in ritardo",
-                Valore = response.ProgettiInRitardo.ToString(),
-                Sottotitolo = "Con data richiesta superata"
-            },
-            TempoOggi = new DashboardStatCardViewModel
-            {
-                Titolo = "Tempo lavorato oggi",
-                Valore = FormatMinutes(response.MinutiLavoratiOggi),
-                Sottotitolo = "Somma di tutte le registrazioni odierne"
-            },
-            TempoUltimi7Giorni = new DashboardStatCardViewModel
-            {
-                Titolo = "Ultimi 7 giorni",
-                Valore = FormatMinutes(response.MinutiLavoratiUltimi7Giorni),
-                Sottotitolo = "Tempo complessivo settimanale"
-            },
-            UltimiAggiornamenti = response.UltimiAggiornamenti
-                .OrderByDescending(x => x.Data)
-                .Select(x => new RecentActivityViewModel
+                ProgettiAperti = new DashboardStatCardViewModel
                 {
-                    Data = x.Data,
-                    Azione = x.Azione,
-                    Utente = x.Utente,
-                    ProgettoId = x.ProgettoId
-                })
-                .ToList()
-        };
+                    Titolo = "Progetti aperti",
+                    Valore = response.ProgettiAperti.ToString(),
+                    Sottotitolo = "Attualmente non completati"
+                },
+                ProgettiUrgenti = new DashboardStatCardViewModel
+                {
+                    Titolo = "Progetti urgenti",
+                    Valore = response.ProgettiUrgenti.ToString(),
+                    Sottotitolo = "Da tenere sotto controllo"
+                },
+                ProgettiInRitardo = new DashboardStatCardViewModel
+                {
+                    Titolo = "Progetti in ritardo",
+                    Valore = response.ProgettiInRitardo.ToString(),
+                    Sottotitolo = "Con data richiesta superata"
+                },
+                TempoOggi = new DashboardStatCardViewModel
+                {
+                    Titolo = "Tempo lavorato oggi",
+                    Valore = FormatMinutes(response.MinutiLavoratiOggi),
+                    Sottotitolo = "Somma di tutte le registrazioni odierne"
+                },
+                TempoUltimi7Giorni = new DashboardStatCardViewModel
+                {
+                    Titolo = "Ultimi 7 giorni",
+                    Valore = FormatMinutes(response.MinutiLavoratiUltimi7Giorni),
+                    Sottotitolo = "Tempo complessivo settimanale"
+                },
+                UltimiAggiornamenti = response.UltimiAggiornamenti
+                    .OrderByDescending(x => x.Data)
+                    .Select(x => new RecentActivityViewModel
+                    {
+                        Data = x.Data,
+                        Azione = x.Azione,
+                        Utente = x.Utente,
+                        ProgettoId = x.ProgettoId
+                    })
+                    .ToList()
+            };
+        }
+        catch (ApiClientException ex)
+        {
+            return CreateErrorDashboard(ex.Message);
+        }
     }
 
     public string FormatMinutes(int minutes)
@@ -87,5 +94,34 @@ public class DashboardUiService : IDashboardUiService
         var ore = minutes / 60;
         var minuti = minutes % 60;
         return $"{ore}h {minuti}m";
+    }
+
+    private DashboardViewModel CreateErrorDashboard(string message)
+    {
+        return new DashboardViewModel
+        {
+            ProgettiAperti = CreateEmptyCard("Progetti aperti"),
+            ProgettiUrgenti = CreateEmptyCard("Progetti urgenti"),
+            ProgettiInRitardo = CreateEmptyCard("Progetti in ritardo"),
+            TempoOggi = CreateEmptyCard("Tempo lavorato oggi"),
+            TempoUltimi7Giorni = CreateEmptyCard("Ultimi 7 giorni"),
+            UltimiAggiornamenti = new List<RecentActivityViewModel>(),
+            Message = new UiMessageViewModel
+            {
+                Title = "Dashboard non disponibile",
+                Text = message,
+                CssClass = "alert-danger"
+            }
+        };
+    }
+
+    private static DashboardStatCardViewModel CreateEmptyCard(string titolo)
+    {
+        return new DashboardStatCardViewModel
+        {
+            Titolo = titolo,
+            Valore = "-",
+            Sottotitolo = "Dato non disponibile"
+        };
     }
 }

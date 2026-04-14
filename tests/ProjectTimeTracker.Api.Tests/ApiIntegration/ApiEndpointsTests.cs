@@ -8,16 +8,12 @@ namespace ProjectTimeTracker.Api.Tests.ApiIntegration;
 
 public class ApiEndpointsTests
 {
-    private static HttpClient CreateClient()
-    {
-        var factory = new TestApiFactory();
-        return factory.CreateClient();
-    }
-
     [Fact]
     public async Task Get_Utenti_Should_Return_Ok_And_List()
     {
-        using var client = CreateClient();
+        await using var factory = await TestApiFactory.CreateAsync();
+        using var client = factory.CreateClient();
+
         var response = await client.GetAsync("/api/utenti");
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -29,7 +25,9 @@ public class ApiEndpointsTests
     [Fact]
     public async Task Get_Progetto_By_Id_Should_Return_NotFound_When_Missing()
     {
-        using var client = CreateClient();
+        await using var factory = await TestApiFactory.CreateAsync();
+        using var client = factory.CreateClient();
+
         var response = await client.GetAsync("/api/progetti/99999");
 
         response.StatusCode.Should().Be(HttpStatusCode.NotFound);
@@ -38,7 +36,9 @@ public class ApiEndpointsTests
     [Fact]
     public async Task Post_Progetti_Should_Create_New_Project()
     {
-        using var client = CreateClient();
+        await using var factory = await TestApiFactory.CreateAsync();
+        using var client = factory.CreateClient();
+
         var response = await client.PostAsJsonAsync("/api/progetti", new ProgettoCreateDto
         {
             Oggetto = "Nuovo progetto HTTP",
@@ -59,8 +59,10 @@ public class ApiEndpointsTests
     [Fact]
     public async Task Put_Progetti_Should_Return_NoContent_When_Project_Exists()
     {
-        using var client = CreateClient();
-        var response = await client.PutAsJsonAsync("/api/progetti/100", new ProgettoUpdateDto
+        await using var factory = await TestApiFactory.CreateAsync();
+        using var client = factory.CreateClient();
+
+        var response = await client.PutAsJsonAsync("/api/progetti/1", new ProgettoUpdateDto
         {
             Oggetto = "Progetto aggiornato HTTP",
             Descrizione = "Update test",
@@ -78,8 +80,10 @@ public class ApiEndpointsTests
     [Fact]
     public async Task Delete_TempoLavorato_Should_Return_NoContent_When_Entry_Exists()
     {
-        using var client = CreateClient();
-        var response = await client.DeleteAsync("/api/tempoLavorato/3000");
+        await using var factory = await TestApiFactory.CreateAsync();
+        using var client = factory.CreateClient();
+
+        var response = await client.DeleteAsync("/api/tempoLavorato/1");
 
         response.StatusCode.Should().Be(HttpStatusCode.NoContent);
     }
@@ -87,7 +91,9 @@ public class ApiEndpointsTests
     [Fact]
     public async Task Get_Dashboard_Should_Return_Aggregated_Data()
     {
-        using var client = CreateClient();
+        await using var factory = await TestApiFactory.CreateAsync();
+        using var client = factory.CreateClient();
+
         var response = await client.GetAsync("/api/dashboard");
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -100,11 +106,13 @@ public class ApiEndpointsTests
     [Fact]
     public async Task Get_ProgettoTempoTotale_Should_Return_Total_Minutes()
     {
-        using var client = CreateClient();
-        var response = await client.GetAsync("/api/progetti/100/tempo/totale-minuti");
+        await using var factory = await TestApiFactory.CreateAsync();
+        using var client = factory.CreateClient();
+
+        var response = await client.GetAsync("/api/progetti/1/tempo/totale-minuti");
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         var total = await response.Content.ReadFromJsonAsync<int>();
-        total.Should().Be(135);
+        total.Should().Be(90);
     }
 }

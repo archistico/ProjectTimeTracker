@@ -20,6 +20,8 @@ public class IndexModel : PageModel
 
     public DashboardViewModel Dashboard { get; set; } = new();
 
+    public CurrentUserViewModel? CurrentUser { get; set; }
+
     public async Task<IActionResult> OnGetAsync(CancellationToken cancellationToken)
     {
         if (!_userSessionService.HasCurrentUser())
@@ -27,7 +29,9 @@ public class IndexModel : PageModel
             return RedirectToPage("/Sessione/SelezionaUtente");
         }
 
+        CurrentUser = _userSessionService.GetCurrentUser();
         Dashboard = await _dashboardUiService.GetDashboardAsync(cancellationToken);
+
         return Page();
     }
 }

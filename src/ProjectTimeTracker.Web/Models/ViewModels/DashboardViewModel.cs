@@ -9,4 +9,6 @@ public class DashboardViewModel
     public DashboardStatCardViewModel TempoUltimi7Giorni { get; set; } = new();
 
     public List<RecentActivityViewModel> UltimiAggiornamenti { get; set; } = new();
+
+    public UiMessageViewModel? Message { get; set; }
 }
