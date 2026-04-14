@@ -1,0 +1,106 @@
+﻿.app-shell {
+  display: flex;
+  min-height: 100vh;
+}
+
+.sidebar {
+  width: 280px;
+  background: #101826;
+  border-right: 1px solid #243041;
+  padding: 24px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.main-content {
+  flex: 1;
+  padding: 24px;
+  background: #0b1220;
+}
+
+.topbar {
+  margin-bottom: 18px;
+}
+
+.page-title {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #f3f4f6;
+  margin: 0;
+}
+
+.content-panel {
+  background: #121a29;
+  border: 1px solid #243041;
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.18);
+}
+
+.sidebar-brand {
+  border-bottom: 1px solid #243041;
+  padding-bottom: 16px;
+}
+
+.brand-title {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #f9fafb;
+}
+
+.brand-subtitle {
+  font-size: 0.9rem;
+  color: #9ca3af;
+  margin-top: 4px;
+}
+
+.sidebar-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.nav-link-custom {
+  display: block;
+  padding: 10px 12px;
+  border-radius: 10px;
+  color: #d1d5db;
+  text-decoration: none;
+  transition: background-color 0.15s ease;
+}
+
+.nav-link-custom:hover {
+  background: #1d2838;
+  color: #ffffff;
+}
+
+.sidebar-user {
+  margin-top: auto;
+  background: #121a29;
+  border: 1px solid #243041;
+  border-radius: 14px;
+  padding: 14px;
+}
+
+.user-label {
+  font-size: 0.8rem;
+  color: #9ca3af;
+  margin-bottom: 6px;
+}
+
+.user-name {
+  color: #f9fafb;
+  font-weight: 600;
+}
+
+.user-username {
+  color: #93c5fd;
+  font-size: 0.9rem;
+  margin-top: 4px;
+}
+
+.user-empty {
+  color: #fca5a5;
+  font-size: 0.9rem;
+}

@@ -1,0 +1,101 @@
+﻿@page
+@model ProjectTimeTracker.Web.Pages.IndexModel
+@{
+    ViewData["Title"] = "Dashboard";
+}
+
+<div class="row g-3 mb-4">
+    <div class="col-md-6 col-xl-3">
+        <div class="card-stat">
+            <div class="card-stat-title">@Model.Dashboard.ProgettiAperti.Titolo</div>
+            <div class="card-stat-value">@Model.Dashboard.ProgettiAperti.Valore</div>
+            <div class="card-stat-subtitle">@Model.Dashboard.ProgettiAperti.Sottotitolo</div>
+        </div>
+    </div>
+
+    <div class="col-md-6 col-xl-3">
+        <div class="card-stat">
+            <div class="card-stat-title">@Model.Dashboard.ProgettiUrgenti.Titolo</div>
+            <div class="card-stat-value">@Model.Dashboard.ProgettiUrgenti.Valore</div>
+            <div class="card-stat-subtitle">@Model.Dashboard.ProgettiUrgenti.Sottotitolo</div>
+        </div>
+    </div>
+
+    <div class="col-md-6 col-xl-2">
+        <div class="card-stat">
+            <div class="card-stat-title">@Model.Dashboard.ProgettiInRitardo.Titolo</div>
+            <div class="card-stat-value">@Model.Dashboard.ProgettiInRitardo.Valore</div>
+            <div class="card-stat-subtitle">@Model.Dashboard.ProgettiInRitardo.Sottotitolo</div>
+        </div>
+    </div>
+
+    <div class="col-md-6 col-xl-2">
+        <div class="card-stat">
+            <div class="card-stat-title">@Model.Dashboard.TempoOggi.Titolo</div>
+            <div class="card-stat-value">@Model.Dashboard.TempoOggi.Valore</div>
+            <div class="card-stat-subtitle">@Model.Dashboard.TempoOggi.Sottotitolo</div>
+        </div>
+    </div>
+
+    <div class="col-md-6 col-xl-2">
+        <div class="card-stat">
+            <div class="card-stat-title">@Model.Dashboard.TempoUltimi7Giorni.Titolo</div>
+            <div class="card-stat-value">@Model.Dashboard.TempoUltimi7Giorni.Valore</div>
+            <div class="card-stat-subtitle">@Model.Dashboard.TempoUltimi7Giorni.Sottotitolo</div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3">
+    <div class="col-lg-8">
+        <div class="card-stat">
+            <div class="section-title">Ultimi aggiornamenti</div>
+
+            @if (Model.Dashboard.UltimiAggiornamenti.Count == 0)
+            {
+                <div class="empty-state">Nessun aggiornamento disponibile.</div>
+            }
+            else
+            {
+                <div class="table-responsive">
+                    <table class="table table-dark-custom align-middle">
+                        <thead>
+                            <tr>
+                                <th>Data</th>
+                                <th>Azione</th>
+                                <th>Utente</th>
+                                <th>Progetto</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        @foreach (var item in Model.Dashboard.UltimiAggiornamenti)
+                        {
+                            <tr>
+                                <td>@item.Data.ToString("dd/MM/yyyy HH:mm")</td>
+                                <td>@item.Azione</td>
+                                <td>@item.Utente</td>
+                                <td>
+                                    <a asp-page="/Progetti/Details" asp-route-id="@item.ProgettoId" class="btn btn-sm btn-outline-light">
+                                        Apri progetto
+                                    </a>
+                                </td>
+                            </tr>
+                        }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </div>
+    </div>
+
+    <div class="col-lg-4">
+        <div class="card-stat">
+            <div class="section-title">Azioni rapide</div>
+            <div class="d-grid gap-2">
+                <a asp-page="/Progetti/Index" class="btn btn-primary">Vai ai progetti</a>
+                <a asp-page="/Tempi/Recenti" class="btn btn-outline-light">Vedi tempi recenti</a>
+                <a asp-page="/Sessione/SelezionaUtente" class="btn btn-outline-light">Cambia utente</a>
+            </div>
+        </div>
+    </div>
+</div>

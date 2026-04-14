@@ -1,0 +1,52 @@
+:root {
+    --app-bg: #0b1220;
+    --panel-bg: #121a29;
+    --panel-bg-soft: #172132;
+    --border-color: #243041;
+    --text-main: #f3f4f6;
+    --text-soft: #9ca3af;
+    --accent: #3b82f6;
+    --danger: #ef4444;
+    --warning: #f59e0b;
+    --success: #10b981;
+}
+
+.app-body {
+    background: var(--app-bg);
+    color: var(--text-main);
+}
+
+.form-control,
+.form-select {
+    background-color: #0f1724;
+    border-color: var(--border-color);
+    color: var(--text-main);
+}
+
+.form-control:focus,
+.form-select:focus {
+    background-color: #0f1724;
+    color: var(--text-main);
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 0.2rem rgba(59, 130, 246, 0.15);
+}
+
+.btn-primary {
+    background-color: #2563eb;
+    border-color: #2563eb;
+}
+
+.btn-outline-light {
+    border-color: #5b6778;
+    color: #d1d5db;
+}
+
+.btn-outline-light:hover {
+    background-color: #1d2838;
+    color: #ffffff;
+    border-color: #778396;
+}
+
+.table > :not(caption) > * > * {
+    background-color: transparent;
+}

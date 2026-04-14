@@ -1,0 +1,64 @@
+﻿@using ProjectTimeTracker.Web.Services
+@inject IUserSessionService UserSessionService
+
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - ProjectTimeTracker</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/theme-dark.css" asp-append-version="true" />
+</head>
+<body class="app-body">
+    <div class="app-shell">
+        <aside class="sidebar">
+            <div class="sidebar-brand">
+                <div class="brand-title">ProjectTimeTracker</div>
+                <div class="brand-subtitle">Gestionale progetti</div>
+            </div>
+
+            <nav class="sidebar-nav">
+                <a asp-page="/Index" class="nav-link-custom">Dashboard</a>
+                <a asp-page="/Progetti/Index" class="nav-link-custom">Progetti</a>
+                <a asp-page="/Tempi/Recenti" class="nav-link-custom">Tempi recenti</a>
+                <a asp-page="/Sessione/SelezionaUtente" class="nav-link-custom">Cambia utente</a>
+            </nav>
+
+            <div class="sidebar-user">
+                @{
+                    var currentUser = UserSessionService.GetCurrentUser();
+                }
+
+                @if (currentUser is null)
+                {
+                    <div class="user-empty">Nessun utente selezionato</div>
+                }
+                else
+                {
+                    <div class="user-label">Utente corrente</div>
+                    <div class="user-name">@currentUser.DisplayName</div>
+                    <div class="user-username">@currentUser.Username</div>
+                }
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <header class="topbar">
+                <div>
+                    <h1 class="page-title">@ViewData["Title"]</h1>
+                </div>
+            </header>
+
+            <section class="content-panel">
+                @RenderBody()
+            </section>
+        </main>
+    </div>
+
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>
