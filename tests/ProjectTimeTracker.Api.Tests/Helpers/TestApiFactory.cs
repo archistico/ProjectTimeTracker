@@ -13,6 +13,7 @@ namespace ProjectTimeTracker.Api.Tests.Helpers;
 public sealed class TestApiFactory : IAsyncDisposable
 {
     private WebApplication? _app;
+    private readonly string _dbPath = Path.Combine(Path.GetTempPath(), "test_db.db");
 
     public static async Task<TestApiFactory> CreateAsync()
     {
@@ -41,15 +42,14 @@ public sealed class TestApiFactory : IAsyncDisposable
         builder.WebHost.UseTestServer();
 
         builder.Services
-            .AddControllers()
-            .PartManager.ApplicationParts.Add(new AssemblyPart(typeof(UtentiController).Assembly));
+            .AddControllers();
 
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddSwaggerGen();
 
         builder.Services.AddDbContext<AppDbContext>(options =>
         {
-            options.UseInMemoryDatabase($"ProjectTimeTrackerTestDb_{Guid.NewGuid()}");
+            options.UseSqlite($"Data Source={_dbPath}");
         });
 
         builder.Services.AddScoped<IUtentiService, UtentiService>();
@@ -75,14 +75,6 @@ public sealed class TestApiFactory : IAsyncDisposable
 
         _app = builder.Build();
 
-        using (var scope = _app.Services.CreateScope())
-        {
-            var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-            db.Database.EnsureDeleted();
-            db.Database.EnsureCreated();
-            SeedTestData(db);
-        }
-
         _app.UseRouting();
         _app.UseMiddleware<ExceptionHandlingMiddleware>();
         _app.UseCors("WebClient");
@@ -90,6 +82,15 @@ public sealed class TestApiFactory : IAsyncDisposable
         _app.MapControllers();
 
         await _app.StartAsync();
+
+        using (var scope = _app.Services.CreateScope())
+        {
+            var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+            // Delete and recreate to ensure clean state
+            db.Database.EnsureDeleted();
+            db.Database.EnsureCreated();
+            SeedTestData(db);
+        }
     }
 
     private static void SeedTestData(AppDbContext db)
@@ -196,5 +197,13 @@ public sealed class TestApiFactory : IAsyncDisposable
             await _app.DisposeAsync();
             _app = null;
         }
+
+        // Clean up test database
+        try
+        {
+            if (File.Exists(_dbPath))
+                File.Delete(_dbPath);
+        }
+        catch { }
     }
 }

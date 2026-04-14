@@ -14,7 +14,7 @@ public class ApiEndpointsTests
         await using var factory = await TestApiFactory.CreateAsync();
         using var client = factory.CreateClient();
 
-        var response = await client.GetAsync("/api/utenti");
+        var response = await client.GetAsync("/api/Utenti");
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         var users = await response.Content.ReadFromJsonAsync<List<UtenteDto>>();
@@ -28,7 +28,7 @@ public class ApiEndpointsTests
         await using var factory = await TestApiFactory.CreateAsync();
         using var client = factory.CreateClient();
 
-        var response = await client.GetAsync("/api/progetti/99999");
+        var response = await client.GetAsync("/api/Progetti/99999");
 
         response.StatusCode.Should().Be(HttpStatusCode.NotFound);
     }
@@ -39,7 +39,7 @@ public class ApiEndpointsTests
         await using var factory = await TestApiFactory.CreateAsync();
         using var client = factory.CreateClient();
 
-        var response = await client.PostAsJsonAsync("/api/progetti", new ProgettoCreateDto
+        var response = await client.PostAsJsonAsync("/api/Progetti", new ProgettoCreateDto
         {
             Oggetto = "Nuovo progetto HTTP",
             Descrizione = "Creato via test integrazione",
@@ -62,7 +62,7 @@ public class ApiEndpointsTests
         await using var factory = await TestApiFactory.CreateAsync();
         using var client = factory.CreateClient();
 
-        var response = await client.PutAsJsonAsync("/api/progetti/1", new ProgettoUpdateDto
+        var response = await client.PutAsJsonAsync("/api/Progetti/1", new ProgettoUpdateDto
         {
             Oggetto = "Progetto aggiornato HTTP",
             Descrizione = "Update test",
@@ -83,7 +83,7 @@ public class ApiEndpointsTests
         await using var factory = await TestApiFactory.CreateAsync();
         using var client = factory.CreateClient();
 
-        var response = await client.DeleteAsync("/api/tempoLavorato/1");
+        var response = await client.DeleteAsync("/api/TempoLavorato/1");
 
         response.StatusCode.Should().Be(HttpStatusCode.NoContent);
     }
@@ -94,7 +94,7 @@ public class ApiEndpointsTests
         await using var factory = await TestApiFactory.CreateAsync();
         using var client = factory.CreateClient();
 
-        var response = await client.GetAsync("/api/dashboard");
+        var response = await client.GetAsync("/api/Dashboard");
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         var dashboard = await response.Content.ReadFromJsonAsync<DashboardDto>();
@@ -109,7 +109,7 @@ public class ApiEndpointsTests
         await using var factory = await TestApiFactory.CreateAsync();
         using var client = factory.CreateClient();
 
-        var response = await client.GetAsync("/api/progetti/1/tempo/totale-minuti");
+        var response = await client.GetAsync("/api/Progetti/1/tempo/totale-minuti");
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         var total = await response.Content.ReadFromJsonAsync<int>();
